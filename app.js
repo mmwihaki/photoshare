@@ -2,18 +2,22 @@ import express from 'express'
 
 const app = express()
 
+app.set('view engine', 'ejs')
+
+const colors = ['Red', 'Yellow', 'Blue', 'Green', 'Orange']
+
 app.get('/', (req, res) => {
-    res.send('hello world!')
+    res.render('index', {title: true, colors: colors})
 })
 
 app.get('/login', (req, res) => {
-    res.send('login page')
+    res.render('login')
 })
 
 //create a signup route that sends 'sign up page' as response
 
 app.get('/signup', (req, res) => {
-    res.send('sign up page')
+    res.render('signup')
 })
 
 app.listen(3000, () => {
