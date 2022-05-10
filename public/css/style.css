@@ -1,0 +1,102 @@
+@font-face {
+    font-family: Quicksand;
+    src: url(Quicksand-VariableFont_wght.ttf);
+}
+
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: Quicksand;
+}
+
+.container {
+    padding-left: 100px;
+    padding-right: 100px;
+}
+
+.access-point{
+    height: 100vh;
+    display: grid;
+    place-items: center;
+}
+
+.access-point form{
+    width: 35%;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #dad8d8;
+    border-radius: 5px;
+}
+
+.access-point .form-title{
+    text-align: center;
+    margin: 8px 0;
+    color: #035397;
+    font-size: 38px;
+}
+
+.access-point label{
+    font-size: 15px;
+}
+
+.access-point input{
+    font-size: 23px;
+    margin-bottom: 5px;
+}
+
+.access-point input[type='submit']{
+    padding: 12px;
+    background-color: #035397;
+    border: 1px solid #035397;
+    color: #fff;
+    margin: 7px 0;
+
+
+}
+
+.access-point p{
+    margin: 8px 0;
+}
+
+header {
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+    background-color: #f2f2f2;
+}
+
+header li {
+    display: inline;
+    font-size: 20px;
+    margin-left: 50px;
+}
+
+header a{
+    text-decoration: none;
+    color: #035397;
+}
+
+header .nav-link:hover {
+    /* text-decoration: underline #035397;
+    text-decoration-thickness: 2px; */
+    border-bottom: 2px solid #035397;
+}
+
+header #login {
+    padding: 10px;
+    border: 1px solid #035397;
+}
+
+header #signup {
+    padding: 10px;
+    background-color: #035397;
+    margin-left: 5px;
+
+}
+
+header #signup a{
+    color: #fff;
+}
