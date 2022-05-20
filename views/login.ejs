@@ -1,14 +1,18 @@
 <%- include('partials/header') %>
 
 <main class="access-point">
-    <form action="">
+    <form action="/login" method="post">
         <p class="form-title">Log In</p>
 
+        <% if(error){ %>
+            <p class="error"><%= message %></p>
+        <% } %>
+
         <label for="">Email Address</label>
-        <input type="email" name="email" id="">
+        <input type="email" name="email" id="" value="<%= user.email %>" required>
 
         <label for="">Password</label>
-        <input type="password" name="password" id="">
+        <input type="password" name="password" id="" value="<%= user.password %>" required minlength="8">
 
         <input type="submit" value="Log In">
 

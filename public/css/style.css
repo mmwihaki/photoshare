@@ -15,6 +15,14 @@
     padding-right: 100px;
 }
 
+.error {
+    background-color: red;
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+    padding: 3px;
+}
+
 .access-point{
     height: 100vh;
     display: grid;
