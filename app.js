@@ -1,6 +1,17 @@
 import express from 'express'
+import mysql from 'mysql'
 
 const app = express()
+
+//configure database 
+const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'photoshare',
+    socketPath: '/Applications/MAMP/tmp/mysql/mysql.sock'
+})
+
 
 app.set('view engine', 'ejs')
 app.use(express.static('public'))
@@ -8,13 +19,13 @@ app.use(express.static('public'))
 //config to access form info
 app.use(express.urlencoded({extended: false}))
 
-const users = [
-    {
-        fullname: 'Mini Me',
-        email: 'kessylyeon@yahoo.com',
-        password: '5yv9vdUseJ@ChU'
-    }
-]
+// const users = [
+//     {
+//         fullname: 'Mini Me',
+//         email: 'kessylyeon@yahoo.com',
+//         password: '5yv9vdUseJ@ChU'
+//     }
+// ]
 
 app.get('/', (req, res) => {
     res.render('index', {title: true})
@@ -71,27 +82,17 @@ app.get('/signup', (req, res) => {
 app.post('/signup', (req, res) => {
     if (req.body.password === req.body.confirmPassword) {
         
-        let user = users.find(user => user.email === req.body.email)
-        if (user) {
-            let user = {
-                fullname: req.body.fullname,
-                email: req.body.email,
-                password: req.body.password,
-                confirmPassword: req.body.confirmPassword
+        connection.query(
+            'SELECT * FROM users WHERE email = ?', 
+            [req.body.email],
+            (error, results) => {
+                if (error) {
+                    console.log(error)
+                } else {
+                    console.log('query run successfully')
+                }
             }
-            let message = 'Account already exists with the email provided.'
-            res.render('signup', { error: true, message: message, user: user})
-        } else {
-            let user = {
-                fullname: req.body.fullname,
-                email: req.body.email,
-                password: req.body.password
-            }
-            users.push(user)
-            console.log(user)
-            console.log('Account created successfully')
-            res.redirect('/')
-        }
+        )
 
     } else {
         let user = {
