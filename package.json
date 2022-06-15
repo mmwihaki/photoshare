@@ -11,8 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "ejs": "^3.1.7",
     "express": "^4.17.3",
+    "express-session": "^1.17.3",
     "mysql": "^2.18.1"
   },
   "type": "module",

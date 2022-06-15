@@ -1,5 +1,7 @@
 import express from 'express'
 import mysql from 'mysql'
+import bcrypt from 'bcrypt'
+import session from 'express-session'
 
 const app = express()
 
@@ -7,9 +9,8 @@ const app = express()
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '',
+    password: 'BahS#ji($bst-5G',
     database: 'photoshare',
-    socketPath: '/Applications/MAMP/tmp/mysql/mysql.sock'
 })
 
 
@@ -17,18 +18,36 @@ app.set('view engine', 'ejs')
 app.use(express.static('public'))
 
 //config to access form info
-app.use(express.urlencoded({extended: false}))
+app.use(express.urlencoded({ extended: false }))
 
-// const users = [
-//     {
-//         fullname: 'Mini Me',
-//         email: 'kessylyeon@yahoo.com',
-//         password: '5yv9vdUseJ@ChU'
-//     }
-// ]
+//prepare to use session
+app.use(session({
+    secret: 'picha',
+    resave: false,
+    saveUninitialized: false
+}))
+
+//constantly check user is logged in 
+app.use((req, res, next) => {
+    if (req.session.userID === undefined) {
+        res.locals.isLoggedIn = false
+    } else {
+        res.locals.isLoggedIn = true
+        res.locals.username = req.session.username
+    }
+    next()
+})
 
 app.get('/', (req, res) => {
     res.render('index', {title: true})
+})
+
+app.get('/home', (req, res) => {
+    if (res.locals.isLoggedIn) {
+        res.render('home')
+    } else {
+        res.redirect('/login')
+    }
 })
 
 //display login form
@@ -43,29 +62,39 @@ app.get('/login', (req, res) => {
 
 //process login form
 app.post('/login', (req, res) => {
-    let user = users.find(user => user.email === req.body.email)
 
-    if (user) {
-        if (user.password === req.body.password) {
-            console.log('Access granted')
-            res.redirect('/')
-        } else {
-            let user = {
-                email: req.body.email,
-                password: req.body.password
+    connection.query(
+        'SELECT * FROM users WHERE email = ?',
+        [req.body.email],
+        (error, results) => {
+            if (results.length > 0) {
+
+                bcrypt.compare(req.body.password, results[0].password, (error, matches) => {
+                    if (matches) {
+                        req.session.userID = results[0].u_id
+                        req.session.username = results[0].fullname.split(' ')[0]
+                        res.redirect('/home')
+                    } else {
+                        let user = {
+                            email: req.body.email,
+                            password: req.body.password
+                        }
+                        let message = 'Email/Password mismatch'
+                        res.render('login', {error: true, message: message, user: user})
+                    }
+                })
+                
+            } else {
+                let user = {
+                    email: req.body.email,
+                    password: req.body.password
+                }
+                let message = 'Account does not exist. Please create one.'
+                res.render('login', {error: true, message: message, user: user})
             }
-            let message = 'Email/Password mismatch'
-            res.render('login', {error: true, message: message, user: user})
         }
-    } else {
-        let user = {
-            email: req.body.email,
-            password: req.body.password
-        }
-        let message = 'Account does not exist. Please create one.'
-        res.render('login', {error: true, message: message, user: user})
-    }
-}) 
+    )
+})
 
 //display signup form
 app.get('/signup', (req, res) => {
@@ -86,10 +115,26 @@ app.post('/signup', (req, res) => {
             'SELECT * FROM users WHERE email = ?', 
             [req.body.email],
             (error, results) => {
-                if (error) {
-                    console.log(error)
+                if (results.length > 0) {
+                    let user = {
+                        fullname: req.body.fullname,
+                        email: req.body.email,
+                        password: req.body.password,
+                        confirmPassword: req.body.confirmPassword
+                    }
+                    let message = 'Account already exists'
+                    res.render('signup', { error: true, message: message, user: user})
                 } else {
-                    console.log('query run successfully')
+                    bcrypt.hash(req.body.password, 10, (error, hash) => {
+                        connection.query(
+                            'INSERT INTO users (fullname, email, password) VALUES (?,?,?)',
+                            [req.body.fullname, req.body.email, hash],
+                            (error, results) => {
+                                res.send('account successfully created!')
+                            }
+                        )
+                    })
+
                 }
             }
         )
@@ -104,6 +149,14 @@ app.post('/signup', (req, res) => {
         let message = 'Passwords are not matching'
         res.render('signup', { error: true, message: message, user: user})
     }
+})
+
+//logout functionality
+app.get('/logout', (req, res) => {
+    //kill the session
+    req.session.destroy((error) => {
+        res.redirect('/')
+    })
 })
 
 app.listen(3000, () => {
