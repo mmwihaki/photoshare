@@ -1,0 +1,28 @@
+<%- include('partials/header') %>
+
+    <%- include('partials/nav') %>
+
+    <main id="complete-profile">
+        <form action="/complete-profile" method="post" enctype="multipart/form-data">
+            <div class="form-input">
+                <label for="">Full Name</label>
+                <input type="text" name="name" id="" value="<%= profile.fullname %>">
+            </div>
+            <div class="form-input">
+                <label for="">Email</label>
+                <input type="text" name="email" id="" value="<%= profile.email %>">
+            </div>
+            <div class="form-input">
+                <label for="">Status</label>
+                <input type="text" name="status" id="">
+            </div>
+            <div class="form-input">
+                <label for="">Profile Picture</label>
+                <input type="file" name="photo" id="">
+            </div>
+            <input type="submit" value="save">
+        </form>
+    </main>
+
+
+<%- include('partials/footer') %>

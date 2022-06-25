@@ -1,0 +1,12 @@
+<%- include('partials/header')  %>
+
+    <%- include('partials/nav')  %>
+
+    <main id="profile">
+        <img src="/uploads/<%= profile.photoURL %>" alt="">
+        <h1><%= profile.name %></h1>
+        <a href="/edit-profile">Edit Profile</a>
+    </main>
+
+
+<%- include('partials/footer') %>

@@ -7,6 +7,7 @@
         <li class="nav-link"><a href="/">Support</a></li>
 
         <% if (locals.isLoggedIn){ %>
+            <li class="nav-link"><a href="/profile">My Account</a></li>
             <li class="nav-link"><a href="/logout">Log Out</a></li>
         <% } else { %>
             <li id="login"><a href="/login">Log In</a></li>

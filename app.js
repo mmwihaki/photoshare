@@ -2,8 +2,11 @@ import express from 'express'
 import mysql from 'mysql'
 import bcrypt from 'bcrypt'
 import session from 'express-session'
+import multer from 'multer'
 
 const app = express()
+
+const upload = multer({dest: 'public/uploads/'})
 
 //configure database 
 const connection = mysql.createConnection({
@@ -42,7 +45,7 @@ app.get('/', (req, res) => {
     res.render('index', {title: true})
 })
 
-app.get('/home', (req, res) => {
+app.get('/app', (req, res) => {
     if (res.locals.isLoggedIn) {
         res.render('home')
     } else {
@@ -73,7 +76,11 @@ app.post('/login', (req, res) => {
                     if (matches) {
                         req.session.userID = results[0].u_id
                         req.session.username = results[0].fullname.split(' ')[0]
-                        res.redirect('/home')
+                        if (results[0].profile_status === 'INCOMPLETE') {
+                            res.redirect('/complete-profile')
+                        } else {
+                            res.redirect('/app')
+                        }
                     } else {
                         let user = {
                             email: req.body.email,
@@ -130,7 +137,7 @@ app.post('/signup', (req, res) => {
                             'INSERT INTO users (fullname, email, password) VALUES (?,?,?)',
                             [req.body.fullname, req.body.email, hash],
                             (error, results) => {
-                                res.send('account successfully created!')
+                                res.redirect('/complete-profile')
                             }
                         )
                     })
@@ -149,6 +156,68 @@ app.post('/signup', (req, res) => {
         let message = 'Passwords are not matching'
         res.render('signup', { error: true, message: message, user: user})
     }
+})
+
+//profile
+app.get('/profile', (req, res) => {
+    if (res.locals.isLoggedIn) {
+        connection.query(
+            'SELECT * FROM users WHERE u_id = ?',
+            [req.session.userID],
+            (error, results) => {
+                const profile = {
+                    name: results[0].fullname,
+                    photoURL: results[0].photoURL
+                }
+                res.render('profile', {profile: profile})
+            }
+        )
+    } else {
+        res.redirect('/login')
+    }
+})
+
+//complete profile
+app.get('/complete-profile', (req, res) => {
+    if (res.locals.isLoggedIn) {
+        connection.query(
+            'SELECT fullname, email  FROM users WHERE u_id = ?',
+            [req.session.userID],
+            (error, results) => {
+                const profile = {
+                    fullname: results[0].fullname,
+                    email: results[0].email
+                }
+                res.render('complete-profile', {profile: profile})
+            }
+        )
+    } else {
+        res.redirect('/login')
+    }
+})
+
+app.post('/complete-profile', upload.single('photo'), (req, res) => {
+    const profile = {
+        fullname: req.body.name,
+        email: req.body.email,
+        status: req.body.status,
+        photoURL: req.file.filename
+    }
+
+    connection.query(
+        'UPDATE users SET fullname = ?, email = ?, status = ?, photoURL = ?, profile_status = ? WHERE u_id = ?',
+        [
+            profile.fullname, 
+            profile.email,
+            profile.status, 
+            profile.photoURL, 
+            'COMPLETE',
+            req.session.userID
+        ], 
+        (error, results) => {
+            res.redirect('/app')
+        }
+    )
 })
 
 //logout functionality
